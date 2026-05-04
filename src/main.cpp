@@ -2,23 +2,24 @@
 #include "Level.h"
 
 int main() {
-    // 1. Initialize the Window (1280x720)
+    // Initialize Window
     const int screenWidth = 1280;
     const int screenHeight = 720;
     InitWindow(screenWidth, screenHeight, "Geometry Dash Clone");
     SetTargetFPS(60);
 
-    // 2. Load the Level
-    // Speed = 6.0f, TileSize = 60.0f
-    // Because TileSize is 60, make sure your level1.txt is EXACTLY 12 rows tall (720 / 60 = 12)
+    // Load Level
     Level myLevel(6.0f, 60.0f); 
     myLevel.LoadFromFile("assets/level1.txt");
 
-    // 3. Main Game Loop
+    // Game Loop
     while (!WindowShouldClose()) {
         
         // --- UPDATE LOGIC ---
-        myLevel.Update();
+        // Only keep scrolling the level if the player hasn't won yet
+        if (!myLevel.IsCompleted()) {
+            myLevel.Update();
+        }
 
         // --- DRAWING ---
         BeginDrawing();
@@ -26,14 +27,24 @@ int main() {
 
         myLevel.Draw();
 
-        // Testing text to make sure raylib compiled properly
-        DrawFPS(10, 10);
-        DrawText("If you see blocks scrolling left, your CMake worked!", 10, 40, 20, DARKGRAY);
+        // Check the win state to draw the UI overlay
+        if (myLevel.IsCompleted()) {
+            // Draw a semi-transparent black box over the whole screen
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.5f));
+            
+            // Draw the Win Text
+            DrawText("LEVEL COMPLETE!", screenWidth / 2 - 200, screenHeight / 2 - 50, 50, GREEN);
+            DrawText("Press ESC to exit", screenWidth / 2 - 100, screenHeight / 2 + 20, 20, WHITE);
+        } else {
+            // Draw standard UI while playing
+            DrawFPS(10, 10);
+            DrawText("Wait for the green finish line...", 10, 40, 20, DARKGRAY);
+        }
 
         EndDrawing();
     }
 
-    // 4. Clean Up
+    // Clean Up
     CloseWindow();
     return 0;
 }

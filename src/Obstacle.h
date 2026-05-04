@@ -4,7 +4,8 @@
 
 enum class ObstacleType {
     BLOCK,
-    SPIKE
+    SPIKE,
+    FINISH_LINE 
 };
 
 class Obstacle {

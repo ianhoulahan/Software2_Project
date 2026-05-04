@@ -4,8 +4,14 @@ Obstacle::Obstacle(float x, float y, float width, float height, ObstacleType typ
     this->hitBox = { x, y, width, height };
     this->type = type;
     
-    // Spikes are red, Blocks are dark gray
-    this->color = (type == ObstacleType::SPIKE) ? RED : DARKGRAY;
+    // Assign colors based on the type of obstacle
+    if (type == ObstacleType::SPIKE) {
+        this->color = RED;
+    } else if (type == ObstacleType::BLOCK) {
+        this->color = DARKGRAY;
+    } else if (type == ObstacleType::FINISH_LINE) {
+        this->color = GREEN; 
+    }
 }
 
 void Obstacle::Update(float scrollSpeed) {
@@ -21,7 +27,7 @@ void Obstacle::Draw() const {
         
         DrawTriangle(top, bottomLeft, bottomRight, color);
     } else {
-        // Draw a standard square for blocks
+        // Draw a standard square for both blocks AND the finish line
         DrawRectangleRec(hitBox, color);
     }
 }

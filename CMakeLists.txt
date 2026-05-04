@@ -35,5 +35,9 @@ target_link_libraries(Software2_Project PRIVATE raylib)
 # Tell the compiler to look inside the "src" folder for our .h files
 target_include_directories(Software2_Project PRIVATE src)
 
-# Automatically copy the assets folder into the build directory so the game can find it
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Automatically copy the assets folder EVERY TIME we build the game
+add_custom_command(TARGET Software2_Project POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets
+    ${CMAKE_CURRENT_BINARY_DIR}/assets
+)
