@@ -14,7 +14,7 @@ public:
     const float gravity = 0.38f;
     const float jumpForce = -13.0f;
     bool isDead;  
-    
+
 
     Player(float x, float y) {
         rect = { x, y, 60, 60 };
@@ -50,9 +50,32 @@ public:
         for (const auto& obs : obstacles) {
             if (CheckCollisionRecs(rect, obs.GetHitBox())) {
                 
+                // SPIKE COLLISION -> True Triangle Math
                 if (obs.GetType() == ObstacleType::SPIKE) {
-                    isDead = true; // Spike death
-                    return;
+                    
+                    Rectangle s = obs.GetHitBox();
+                    
+                    // 1. Define the 3 points of the Spike triangle
+                    // We bring the tip down 8px and edges in 4px just to make it feel perfectly fair
+                    Vector2 top = { s.x + (s.width / 2.0f), s.y + 8.0f }; 
+                    Vector2 bottomLeft = { s.x + 4.0f, s.y + s.height }; 
+                    Vector2 bottomRight = { s.x + s.width - 4.0f, s.y + s.height };
+
+                    // 2. Define the points on the Player's body that might hit the spike
+                    Vector2 pBottomLeft = { rect.x, rect.y + rect.height };
+                    Vector2 pBottomRight = { rect.x + rect.width, rect.y + rect.height };
+                    Vector2 pBottomCenter = { rect.x + (rect.width / 2.0f), rect.y + rect.height };
+                    Vector2 pRightCenter = { rect.x + rect.width, rect.y + (rect.height / 2.0f) };
+
+                    // 3. Check if any of the player's points have crossed into the triangle
+                    if (CheckCollisionPointTriangle(pBottomLeft, top, bottomLeft, bottomRight) ||
+                        CheckCollisionPointTriangle(pBottomRight, top, bottomLeft, bottomRight) ||
+                        CheckCollisionPointTriangle(pBottomCenter, top, bottomLeft, bottomRight) ||
+                        CheckCollisionPointTriangle(pRightCenter, top, bottomLeft, bottomRight)) {
+                        
+                        isDead = true;
+                        return;
+                    }
                 }
 
                 if (obs.GetType() == ObstacleType::BLOCK) {
@@ -67,9 +90,15 @@ public:
                             rect.y = obs.GetHitBox().y + obs.GetHitBox().height; // Hit ceiling
                             verticalVelocity = 0.0f;
                         }
-                    } else { // Side collision
-                        isDead = true; // Wall death
-                        return;
+                    } // If the overlap is taller than it is wide, it MIGHT be a wall
+                    else {
+                        // THE SEAM CATCH FIX:
+                        // Only die if the obstacle is actually tall enough to be a wall.
+                        // 12-pixel buffer so falling fast onto floor seams is ignored.
+                        if (rect.y + rect.height - 12.0f > obs.GetHitBox().y) {
+                            isDead = true;
+                            return;
+                        }
                     }
                 }
             }
