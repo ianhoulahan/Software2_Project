@@ -3,7 +3,6 @@
 #include "player.h"
 #include "camera.h"
 
-
 int main() {
     // Initialize Window
     const int screenWidth = 1280;
@@ -17,20 +16,24 @@ int main() {
     Level myLevel(6.0f, 60.0f); 
     myLevel.LoadFromFile("assets/level1.txt");
 
-    //Load Player (Position x:100, y: groundY)
-    Player myPlayer(200.0f, 600.0f);
+    // Load Player 
+    // Starting at Y: 600 
+    Player myPlayer(200.0f, 600.0f); 
 
-    //Initialize camera
+    // Initialize camera
     GameCamera myGameCamera(screenWidth, screenHeight);
 
     // Game Loop
     while (!WindowShouldClose()) {
         
         // --- UPDATE LOGIC ---
-        // Only keep scrolling the level if the player hasn't won yet
-        if (!myLevel.IsCompleted()) {
+        // Only keep playing if we haven't won AND we aren't dead
+        if (!myLevel.IsCompleted() && !myPlayer.isDead) {
             myLevel.Update();
-            myPlayer.Update();
+            
+            // Pass the obstacles into the player for hit detection!
+            myPlayer.Update(myLevel.GetObstacles()); 
+            
             myGameCamera.Update(myPlayer);
 
             elapsedSeconds = GetTime() - startTime;
@@ -47,18 +50,24 @@ int main() {
 
         myGameCamera.End();
 
-        DrawText(TextFormat("TIME: %.2f s",elapsedSeconds),1100,10,20,DARKGRAY);
+        // Draw Timer UI
+        DrawText(TextFormat("TIME: %.2f s", elapsedSeconds), 1100, 10, 20, DARKGRAY);
 
-        // Check the win state to draw the UI overlay
+        // --- GAME STATE OVERLAYS ---
         if (myLevel.IsCompleted()) {
-            // Draw a semi-transparent black box over the whole screen
+            // WIN STATE
             DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.5f));
-            
-            // Draw the Win Text
             DrawText("LEVEL COMPLETE!", screenWidth / 2 - 200, screenHeight / 2 - 50, 50, GREEN);
             DrawText("Press ESC to exit", screenWidth / 2 - 100, screenHeight / 2 + 20, 20, WHITE);
-        } else {
-            // Draw standard UI while playing
+        } 
+        else if (myPlayer.isDead) {
+            // DEATH STATE
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.8f));
+            DrawText("GAME OVER", screenWidth / 2 - 150, screenHeight / 2 - 50, 50, RED);
+            DrawText("Press ESC to exit", screenWidth / 2 - 100, screenHeight / 2 + 20, 20, WHITE);
+        } 
+        else {
+            // PLAYING STATE
             DrawFPS(10, 10);
             DrawText("Wait for the green finish line...", 10, 40, 20, DARKGRAY);
         }
