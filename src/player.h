@@ -9,12 +9,12 @@ public:
     float verticalVelocity;
     bool isGrounded;
     
-    const float gravity = 0.15f;
-    const float jumpForce = -3.0f; 
-    const float groundY = 550.0f;  // The starting Y position
+    const float gravity = 0.38f;
+    const float jumpForce = -13.0f;
+    const float groundY = 580.0f;  // The starting Y position
 
     Player(float x, float y) {
-        rect = { x, y, 40, 40 };
+        rect = { x, y, 80, 80 };
         color = RED;
         verticalVelocity = 0.0f;
         isGrounded = true;
