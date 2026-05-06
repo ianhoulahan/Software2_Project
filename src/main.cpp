@@ -18,7 +18,7 @@ int main() {
     myLevel.LoadFromFile("assets/level1.txt");
 
     //Load Player (Position x:100, y: groundY)
-    Player myPlayer(100.0f, 580.0f);
+    Player myPlayer(200.0f, 600.0f);
 
     //Initialize camera
     GameCamera myGameCamera(screenWidth, screenHeight);
