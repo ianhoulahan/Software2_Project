@@ -116,4 +116,12 @@ public:
     Vector2 GetCenter() {
         return (Vector2){ rect.x + rect.width / 2.0f, rect.y + rect.height / 2.0f };
     }
+
+    void Reset(float startX, float startY) {
+        rect.x = startX;
+        rect.y = startY;
+        verticalVelocity = 0.0f;
+        isGrounded = false; // Set to false to let gravity settle the player
+        isDead = false;
+    }
 };
