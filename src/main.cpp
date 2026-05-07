@@ -14,7 +14,7 @@ int main() {
 
     // Load Level
     Level myLevel(6.0f, 60.0f); 
-    myLevel.LoadFromFile("assets/level1.txt");
+    myLevel.LoadFromFile("assets/level3.txt");
 
     // Load Player 
     // Starting at Y: 600 

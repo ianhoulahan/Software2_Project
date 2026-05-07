@@ -35,9 +35,12 @@ target_link_libraries(Software2_Project PRIVATE raylib)
 # Tell the compiler to look inside the "src" folder for our .h files
 target_include_directories(Software2_Project PRIVATE src)
 
-# Automatically copy the assets folder EVERY TIME we build the game
-add_custom_command(TARGET Software2_Project POST_BUILD
+# 1. Create a standalone task that ALWAYS copies the assets
+add_custom_target(CopyAssets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/assets
     ${CMAKE_CURRENT_BINARY_DIR}/assets
 )
+
+# 2. Tell Ninja that the game CANNOT launch until CopyAssets is finished
+add_dependencies(Software2_Project CopyAssets)

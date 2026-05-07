@@ -11,8 +11,8 @@ public:
     float verticalVelocity;
     bool isGrounded;
     
-    const float gravity = 0.38f;
-    const float jumpForce = -13.0f;
+    const float gravity = 0.70f;
+    const float jumpForce = -14.0f;
     bool isDead;  
 
 
@@ -78,27 +78,31 @@ public:
                     }
                 }
 
+                // BLOCK COLLISION -> Time-Rewind Logic (Continuous Collision)
                 if (obs.GetType() == ObstacleType::BLOCK) {
-                    Rectangle overlap = GetCollisionRec(rect, obs.GetHitBox());
+                    
+                    // Look back 1 frame to see where the player's feet used to be
+                    float previousBottom = (rect.y + rect.height) - verticalVelocity;
+                    float blockTop = obs.GetHitBox().y;
 
-                    if (overlap.width > overlap.height) { // Top/Bottom collision
-                        if (verticalVelocity > 0 && rect.y < obs.GetHitBox().y) {
-                            rect.y = obs.GetHitBox().y - rect.height; // Landed on top
-                            verticalVelocity = 0.0f;
-                            isGrounded = true;
-                        } else if (verticalVelocity < 0) {
-                            rect.y = obs.GetHitBox().y + obs.GetHitBox().height; // Hit ceiling
-                            verticalVelocity = 0.0f;
-                        }
-                    } // If the overlap is taller than it is wide, it MIGHT be a wall
+                    // 1. SAFE LANDING (Top Collision)
+                    // If we are falling, and our feet started above (or exactly level with) the block...
+                    if (verticalVelocity > 0 && previousBottom <= blockTop + 0.1f) {
+                        rect.y = blockTop - rect.height; // Snap feet perfectly to the surface
+                        verticalVelocity = 0.0f;
+                        isGrounded = true;
+                    } 
+                    // 2. CEILING BONK (Bottom Collision)
+                    // If moving up, and our head started below the block...
+                    else if (verticalVelocity < 0 && (rect.y - verticalVelocity) >= obs.GetHitBox().y + obs.GetHitBox().height) {
+                        rect.y = obs.GetHitBox().y + obs.GetHitBox().height; // Push down
+                        verticalVelocity = 0.0f;
+                    } 
+                    // 3. WALL SMASH (Side Collision)
+                    // If we didn't land on it, and we didn't bonk our head under it, we hit a wall!
                     else {
-                        // THE SEAM CATCH FIX:
-                        // Only die if the obstacle is actually tall enough to be a wall.
-                        // 12-pixel buffer so falling fast onto floor seams is ignored.
-                        if (rect.y + rect.height - 12.0f > obs.GetHitBox().y) {
-                            isDead = true;
-                            return;
-                        }
+                        isDead = true;
+                        return;
                     }
                 }
             }
